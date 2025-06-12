@@ -1,5 +1,5 @@
 #
-# Copyright 2023-2024 the Pacemaker project contributors
+# Copyright 2023-2025 the Pacemaker project contributors
 #
 # The version control history for this file may have further details.
 #
@@ -10,7 +10,8 @@
 include $(top_srcdir)/mk/common.mk
 
 pkgpython_PYTHON = __init__.py 		\
-		   _library.py 		\
+		   _library.py          \
+		   errors.py            \
 		   exitstatus.py
 
 nodist_pkgpython_PYTHON = buildoptions.py
