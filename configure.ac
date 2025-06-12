@@ -1083,6 +1083,10 @@ PKG_CHECK_MODULES(LIBXML2, [libxml-2.0 >= 2.9.2],
                   [CPPFLAGS="${CPPFLAGS} ${LIBXML2_CFLAGS}"
                    LIBS="${LIBS} ${LIBXML2_LIBS}"])
 
+PKG_CHECK_MODULES(PYTHON, [python3 >= 3.6],
+		  [CPPFLAGS="${CPPFLAGS} ${PYTHON_FLAGS}"
+		   LIBS="${LIBS} ${PYTHON_LIBS}"])
+
 AC_PATH_PROGS(XMLLINT_PATH, xmllint, /usr/bin/xmllint)
 AC_DEFINE_UNQUOTED(XMLLINT_PATH, "$XMLLINT_PATH", xmllint command)
 
