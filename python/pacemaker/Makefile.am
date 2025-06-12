@@ -9,6 +9,8 @@
 
 include $(top_srcdir)/mk/common.mk
 
+AM_CPPFLAGS += $(PYTHON_CFLAGS)
+
 pkgpython_PYTHON = __init__.py 		\
 		   _library.py          \
 		   errors.py            \
@@ -17,3 +19,9 @@ pkgpython_PYTHON = __init__.py 		\
 nodist_pkgpython_PYTHON = buildoptions.py
 
 SUBDIRS = _cts
+
+pkgpyexec_LTLIBRARIES = resource.la
+
+resource_la_SOURCES = resource.c
+resource_la_LDFLAGS = $(AM_LDFLAGS) $(PYTHON_LDFLAGS) -module -avoid-version
+resource_la_LIBADD = $(PYTHON_LIBS)
