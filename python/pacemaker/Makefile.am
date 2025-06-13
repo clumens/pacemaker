@@ -11,12 +11,12 @@ include $(top_srcdir)/mk/common.mk
 
 AM_CPPFLAGS += $(PYTHON_CFLAGS)
 
-pkgpython_PYTHON = __init__.py 		\
+pkgpyexec_PYTHON = __init__.py 		\
 		   _library.py          \
 		   errors.py            \
 		   exitstatus.py
 
-nodist_pkgpython_PYTHON = buildoptions.py
+nodist_pkgpyexec_PYTHON = buildoptions.py
 
 SUBDIRS = _cts
 
