@@ -70,7 +70,7 @@ enum pcmk__multiply_active {
 //! Resource scheduling flags
 enum pcmk__rsc_flags {
     // No resource flags set (compare with equality rather than bit set)
-    pcmk__no_rsc_flags               = UINT64_C(0),
+    pcmk__no_rsc_flags               = 0ULL,
 
     // Whether resource has been removed from the configuration
     pcmk__rsc_removed                = (UINT64_C(1) << 0),
