@@ -225,6 +225,7 @@ class CibsecretTest(CTSTest):
 
         self._test_secrets_removed()
 
+        self._cm.remove_dummy_rsc(node, self._rid)
         return self.success()
 
     @property
