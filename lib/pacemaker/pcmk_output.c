@@ -2227,10 +2227,7 @@ attribute_default(pcmk__output_t *out, va_list args)
 
     s = g_string_sized_new(50);
 
-    if (pcmk__xml_needs_escape(value, pcmk__xml_escape_attr_pretty)) {
-        value_esc = pcmk__xml_escape(value, pcmk__xml_escape_attr_pretty);
-        value = value_esc;
-    }
+    value_esc = pcmk__xml_escape(value, pcmk__xml_escape_attr_pretty);
 
     if (!pcmk__str_empty(scope)) {
         KV_PAIR(PCMK_XA_SCOPE, scope);
@@ -2247,9 +2244,11 @@ attribute_default(pcmk__output_t *out, va_list args)
     }
 
     if (legacy) {
-        pcmk__g_strcat(s, PCMK_XA_VALUE "=", pcmk__s(value, "(null)"), NULL);
+        pcmk__g_strcat(s, PCMK_XA_VALUE "=", pcmk__s(value_esc, "(null)"),
+                       NULL);
     } else {
-        pcmk__g_strcat(s, PCMK_XA_VALUE "=\"", pcmk__s(value, ""), "\"", NULL);
+        pcmk__g_strcat(s, PCMK_XA_VALUE "=\"", pcmk__s(value_esc, ""), "\"",
+                       NULL);
     }
 
     out->info(out, "%s", s->str);
