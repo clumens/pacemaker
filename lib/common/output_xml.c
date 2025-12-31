@@ -270,17 +270,17 @@ xml_subprocess_output(pcmk__output_t *out, int exit_status,
 static void
 xml_version(pcmk__output_t *out)
 {
-    const char *author = "Andrew Beekhof and the Pacemaker project "
-                         "contributors";
+    xmlNode *xml = NULL;
+
     pcmk__assert(out != NULL);
 
-    pcmk__output_create_xml_node(out, PCMK_XE_VERSION,
-                                 PCMK_XA_PROGRAM, "Pacemaker",
-                                 PCMK_XA_VERSION, PACEMAKER_VERSION,
-                                 PCMK_XA_AUTHOR, author,
-                                 PCMK_XA_BUILD, BUILD_VERSION,
-                                 PCMK_XA_FEATURES, CRM_FEATURES,
-                                 NULL);
+    xml = pcmk__output_create_xml_node(out, PCMK_XE_VERSION);
+    pcmk__xe_set(xml, PCMK_XA_PROGRAM, "Pacemaker");
+    pcmk__xe_set(xml, PCMK_XA_VERSION, PACEMAKER_VERSION);
+    pcmk__xe_set(xml, PCMK_XA_AUTHOR,
+                 "Andrew Beekhof and the Pacemaker project contributors");
+    pcmk__xe_set(xml, PCMK_XA_BUILD, BUILD_VERSION);
+    pcmk__xe_set(xml, PCMK_XA_FEATURES, CRM_FEATURES);
 }
 
 G_GNUC_PRINTF(2, 3)
@@ -320,7 +320,7 @@ xml_output_xml(pcmk__output_t *out, const char *name, const char *buf)
 
     pcmk__assert(out != NULL);
 
-    parent = pcmk__output_create_xml_node(out, name, NULL);
+    parent = pcmk__output_create_xml_node(out, name);
     if (parent == NULL) {
         return;
     }
@@ -492,7 +492,7 @@ pcmk__output_xml_create_parent(pcmk__output_t *out, const char *name)
     pcmk__assert(out != NULL);
     CRM_CHECK(pcmk__str_any_of(out->fmt_name, "xml", "html", NULL), return NULL);
 
-    node = pcmk__output_create_xml_node(out, name, NULL);
+    node = pcmk__output_create_xml_node(out, name);
 
     pcmk__output_xml_push_parent(out, node);
     return node;
@@ -518,12 +518,10 @@ pcmk__output_xml_add_node_copy(pcmk__output_t *out, xmlNodePtr node)
     pcmk__xml_copy(parent, node);
 }
 
-xmlNodePtr
-pcmk__output_create_xml_node(pcmk__output_t *out, const char *name, ...)
+xmlNode *
+pcmk__output_create_xml_node(pcmk__output_t *out, const char *name)
 {
-    xmlNodePtr node = NULL;
     private_data_t *priv = NULL;
-    va_list args;
 
     pcmk__assert((out != NULL) && (out->priv != NULL));
     CRM_CHECK(pcmk__str_any_of(out->fmt_name, "xml", "html", NULL), return NULL);
@@ -532,12 +530,7 @@ pcmk__output_create_xml_node(pcmk__output_t *out, const char *name, ...)
 
     priv = out->priv;
 
-    node = pcmk__xe_create(g_queue_peek_tail(priv->parent_q), name);
-    va_start(args, name);
-    pcmk__xe_set_propv(node, args);
-    va_end(args);
-
-    return node;
+    return pcmk__xe_create(g_queue_peek_tail(priv->parent_q), name);
 }
 
 xmlNodePtr
@@ -549,7 +542,7 @@ pcmk__output_create_xml_text_node(pcmk__output_t *out, const char *name,
     pcmk__assert(out != NULL);
     CRM_CHECK(pcmk__str_any_of(out->fmt_name, "xml", "html", NULL), return NULL);
 
-    node = pcmk__output_create_xml_node(out, name, NULL);
+    node = pcmk__output_create_xml_node(out, name);
     pcmk__xe_set_content(node, "%s", content);
     return node;
 }

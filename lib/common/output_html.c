@@ -422,7 +422,7 @@ static void
 html_spacer(pcmk__output_t *out)
 {
     pcmk__assert(out != NULL);
-    pcmk__output_create_xml_node(out, "br", NULL);
+    pcmk__output_create_xml_node(out, "br");
 }
 
 static void

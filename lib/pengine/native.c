@@ -824,13 +824,11 @@ pe__resource_xml(pcmk__output_t *out, va_list args)
          iter = iter->next) {
 
         pcmk_node_t *node = iter->data;
-        const char *cached = pcmk__btoa(node->details->online);
 
-        pcmk__output_create_xml_node(out, PCMK_XE_NODE,
-                                     PCMK_XA_NAME, node->priv->name,
-                                     PCMK_XA_ID, node->priv->id,
-                                     PCMK_XA_CACHED, cached,
-                                     NULL);
+        xml = pcmk__output_create_xml_node(out, PCMK_XE_NODE);
+        pcmk__xe_set(xml, PCMK_XA_NAME, node->priv->name);
+        pcmk__xe_set(xml, PCMK_XA_ID, node->priv->id);
+        pcmk__xe_set_bool(xml, PCMK_XA_CACHED, node->details->online);
     }
 
     pcmk__output_xml_pop_parent(out);
