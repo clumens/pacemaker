@@ -9,25 +9,28 @@
 
 #include <crm_internal.h>
 
-#include <unistd.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-#include <netdb.h>
-#include <termios.h>
-#include <sys/socket.h>
+#include <errno.h>                  // ENOTCONN, EPROTO, EAGAIN
+#include <stdbool.h>                // false, bool, true
+#include <stdlib.h>                 // NULL, free, calloc
+#include <string.h>                 // strdup
+#include <sys/socket.h>             // shutdown, SHUT_RDWR
+#include <time.h>                   // time, time_t
+#include <unistd.h>                 // close
 
-#include <glib.h>
-#include <gnutls/gnutls.h>
+#include <glib.h>                   // gpointer, gboolean, g_list_foreach
+#include <gnutls/gnutls.h>          // gnutls_deinit, gnutls_bye
+#include <libxml/tree.h>            // xmlNode
+#include <qb/qblog.h>               // QB_XS
 
-#include <crm/crm.h>
-#include <crm/cib/internal.h>
-#include <crm/common/mainloop.h>
-#include <crm/common/xml.h>
-
-#include <gnutls/gnutls.h>
+#include <crm/cib/internal.h>       // cib__create_op, cib__extend_transaction
+#include <crm/common/internal.h>
+#include <crm/common/mainloop.h>    // mainloop_fd_callbacks
+#include <crm/crm.h>                // CRM_OP_REGISTER, crm_system_name
+#include <crm/cib.h>                // cib_remote_new
+#include <crm/cib/cib_types.h>      // cib_s, cib_t
+#include <crm/common/results.h>     // pcmk_rc_str, pcmk_rc_*
+#include <crm/common/xml_names.h>   // PCMK_XA_OP, PCMK_XA_REMOTE_TLS_PORT
+#include <crm_config.h>             // PACEMAKER_CONFIG_DIR
 
 // GnuTLS handshake timeout in seconds
 #define TLS_HANDSHAKE_TIMEOUT 5
