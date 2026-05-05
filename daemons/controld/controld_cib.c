@@ -516,7 +516,7 @@ build_parameter_list(const lrmd_event_data_t *op,
 }
 
 static void
-append_restart_list(lrmd_event_data_t *op, struct ra_metadata_s *metadata,
+append_restart_list(const lrmd_event_data_t *op, struct ra_metadata_s *metadata,
                     xmlNode *update, const char *version)
 {
     GString *list = NULL;
@@ -574,7 +574,7 @@ append_restart_list(lrmd_event_data_t *op, struct ra_metadata_s *metadata,
 }
 
 static void
-append_secure_list(lrmd_event_data_t *op, struct ra_metadata_s *metadata,
+append_secure_list(const lrmd_event_data_t *op, struct ra_metadata_s *metadata,
                    xmlNode *update, const char *version)
 {
     GString *list = NULL;
@@ -751,7 +751,7 @@ cib_rsc_callback(xmlNode * msg, int call_id, int rc, xmlNode * output, void *use
  * until it is active there again after the node comes back up.
  */
 static bool
-should_preserve_lock(lrmd_event_data_t *op)
+should_preserve_lock(const lrmd_event_data_t *op)
 {
     if (!pcmk__is_set(controld_globals.flags, controld_shutdown_lock_enabled)) {
         return false;
