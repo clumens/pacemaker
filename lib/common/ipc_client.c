@@ -1006,7 +1006,7 @@ pcmk__connect_generic_ipc(crm_ipc_t *ipc)
 }
 
 void
-crm_ipc_close(crm_ipc_t * client)
+crm_ipc_close(crm_ipc_t *client)
 {
     if (client == NULL) {
         return;
