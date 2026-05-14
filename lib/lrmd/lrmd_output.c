@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 the Pacemaker project contributors
+ * Copyright 2020-2026 the Pacemaker project contributors
  *
  * The version control history for this file may have further details.
  *
@@ -8,6 +8,7 @@
  */
 
 #include <crm_internal.h>
+
 #include <stdarg.h>
 
 #include <crm/lrmd_internal.h>
@@ -24,7 +25,6 @@ default_list(pcmk__output_t *out, lrmd_list_t *list, const char *title) {
     }
 
     out->end_list(out);
-    lrmd_list_freeall(list);
     return pcmk_rc_ok;
 }
 
@@ -36,7 +36,6 @@ xml_list(pcmk__output_t *out, lrmd_list_t *list, const char *ele) {
         pcmk__output_create_xml_text_node(out, ele, iter->val);
     }
 
-    lrmd_list_freeall(list);
     return pcmk_rc_ok;
 }
 
