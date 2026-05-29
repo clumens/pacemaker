@@ -436,7 +436,7 @@ sync_one_file(pcmk__output_t *out, rsh_fn_t rsh_fn, rcp_fn_t rcp_fn,
 
     dirname = g_path_get_dirname(path);
 
-    cmdline = pcmk__assert_asprintf("mkdir -p %s", dirname);
+    cmdline = pcmk__assert_asprintf("mkdir -p '%s'", dirname);
     rc = rsh_fn(out, peers, cmdline);
     if (rc != pcmk_rc_ok) {
         goto done;
@@ -456,7 +456,7 @@ sync_one_file(pcmk__output_t *out, rsh_fn_t rsh_fn, rcp_fn_t rcp_fn,
 
     } else {
         free(cmdline);
-        cmdline = pcmk__assert_asprintf("rm -f %s %s.sign", path, path);
+        cmdline = pcmk__assert_asprintf("rm -f '%s' '%s.sign'", path, path);
         rc = rsh_fn(out, peers, cmdline);
     }
 
@@ -478,7 +478,7 @@ check_cib_rsc(pcmk__output_t *out, const char *rsc)
         return rc;
     }
 
-    cmdline = pcmk__assert_asprintf("crm_resource -r %s -W", rsc);
+    cmdline = pcmk__assert_asprintf("crm_resource -r '%s' -W", rsc);
     rc = run_cmdline(out, cmdline, NULL);
 
     free(cmdline);
@@ -512,7 +512,7 @@ get_cib_param(pcmk__output_t *out, const char *rsc, const char *param)
         return NULL;
     }
 
-    cmdline = pcmk__assert_asprintf("crm_resource -r %s -g %s --output-as=xml",
+    cmdline = pcmk__assert_asprintf("crm_resource -r '%s' -g '%s' --output-as=xml",
                                     rsc, param);
     rc = run_cmdline(out, cmdline, &standard_out);
 
@@ -559,7 +559,7 @@ remove_cib_param(pcmk__output_t *out, const char *rsc, const char *param)
         return rc;
     }
 
-    cmdline = pcmk__assert_asprintf("crm_resource -r %s -d %s", rsc, param);
+    cmdline = pcmk__assert_asprintf("crm_resource -r '%s' -d '%s'", rsc, param);
     rc = run_cmdline(out, cmdline, NULL);
     free(cmdline);
     return rc;
@@ -576,7 +576,7 @@ set_cib_param(pcmk__output_t *out, const char *rsc, const char *param,
         return rc;
     }
 
-    cmdline = pcmk__assert_asprintf("crm_resource -r %s -p %s -v %s", rsc,
+    cmdline = pcmk__assert_asprintf("crm_resource -r '%s' -p '%s' -v '%s'", rsc,
                                     param, value);
     rc = run_cmdline(out, cmdline, NULL);
     free(cmdline);
@@ -630,7 +630,7 @@ local_files_remove(pcmk__output_t *out, rsh_fn_t rsh_fn, rcp_fn_t rcp_fn,
 
     lf_file = pcmk__assert_asprintf(PCMK__CIB_SECRETS_DIR "/%s/%s", rsc, param);
 
-    cmdline = pcmk__assert_asprintf("rm -f %s %s.sign", lf_file, lf_file);
+    cmdline = pcmk__assert_asprintf("rm -f '%s' '%s.sign'", lf_file, lf_file);
     rc = run_cmdline(out, cmdline, NULL);
 
     if (rc == pcmk_rc_ok) {
