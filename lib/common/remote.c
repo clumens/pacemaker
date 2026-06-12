@@ -281,6 +281,8 @@ pcmk__remote_send_xml(pcmk__remote_t *remote, const xmlNode *msg)
 
     struct iovec iov[2];
     struct remote_header_v0 *header;
+    bool did_compress = false;
+    uint32_t payload_len = 0;
 
     CRM_CHECK((remote != NULL) && (msg != NULL), return EINVAL);
 
@@ -293,21 +295,50 @@ pcmk__remote_send_xml(pcmk__remote_t *remote, const xmlNode *msg)
 
     iov[0].iov_base = header;
     iov[0].iov_len = sizeof(struct remote_header_v0);
+    iov[1].iov_base = NULL;
+    iov[1].iov_len = 0;
 
-    iov[1].iov_len = 1 + xml_text->len;
-    iov[1].iov_base = g_string_free(xml_text, FALSE);
+    payload_len = 1 + xml_text->len;
 
     id++;
     header->id = id;
     header->endian = ENDIAN_LOCAL;
     header->version = REMOTE_MSG_VERSION;
     header->payload_offset = iov[0].iov_len;
-    header->payload_uncompressed = iov[1].iov_len;
 
-    if ((UINT32_MAX - iov[0].iov_len) < iov[1].iov_len) {
+    if ((UINT32_MAX - iov[0].iov_len) < payload_len) {
         pcmk__err("Remote message size %zu + %zu exceeds maximum of %" PRIu32,
-                  iov[0].iov_len, iov[1].iov_len, UINT32_MAX);
+                  iov[0].iov_len, payload_len, UINT32_MAX);
         goto done;
+    }
+
+    if (payload_len < PCMK__BZ2_THRESHOLD) {
+        iov[1].iov_len = payload_len;
+        iov[1].iov_base = g_string_free(xml_text, FALSE);
+
+        header->payload_uncompressed = iov[1].iov_len;
+
+    } else {
+        char *compressed = NULL;
+        unsigned int new_size = 0;
+
+        if (pcmk__compress(xml_text->str, payload_len, 0, &compressed,
+                           &new_size) == pcmk_rc_ok) {
+            iov[1].iov_len = new_size;
+            iov[1].iov_base = compressed;
+
+            header->payload_compressed = new_size;
+            header->payload_uncompressed = payload_len;
+            g_string_free(xml_text, TRUE);
+
+            did_compress = true;
+
+        } else {
+            iov[1].iov_len = payload_len;
+            iov[1].iov_base = g_string_free(xml_text, FALSE);
+
+            header->payload_uncompressed = iov[1].iov_len;
+        }
     }
 
     header->size_total = iov[0].iov_len + iov[1].iov_len;
@@ -320,7 +351,13 @@ pcmk__remote_send_xml(pcmk__remote_t *remote, const xmlNode *msg)
 
 done:
     free(iov[0].iov_base);
-    g_free((gchar *) iov[1].iov_base);
+
+    if (did_compress) {
+        free(iov[1].iov_base);
+    } else {
+        g_free((gchar *) iov[1].iov_base);
+    }
+
     return rc;
 }
 
@@ -373,7 +410,7 @@ handle_compressed_payload(struct remote_header_v0 *header,
     }
 
     pcmk__trace("Decompressing message data %" PRIu32 " bytes into %u "
-                "bytes", header->payload_compressed, size_u);
+                "bytes", header->payload_compressed, header->payload_uncompressed);
 
     uncompressed = pcmk__assert_alloc(buffer_size, sizeof(char));
 
@@ -428,7 +465,6 @@ pcmk__remote_message_xml(pcmk__remote_t *remote)
         return NULL;
     }
 
-    /* Support compression on the receiving end now, in case we ever want to add it later */
     if (header->payload_compressed != 0) {
         int rc = handle_compressed_payload(header, remote);
 
