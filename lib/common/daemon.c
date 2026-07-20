@@ -12,6 +12,7 @@
 #include <signal.h>                 // SIG*
 #include <stddef.h>                 // NULL
 #include <stdbool.h>                // bool, false, true
+#include <time.h>                   // time
 
 #include <glib.h>                   // g_clear_pointer, g_main_loop_*
 
@@ -30,6 +31,8 @@
 int
 pcmk__daemon_init(pcmk__daemon_t *srv)
 {
+    srv->start_time = time(NULL);
+
     srv->mainloop = g_main_loop_new(NULL, false);
     return pcmk_rc_ok;
 }
