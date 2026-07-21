@@ -123,6 +123,9 @@ G_GNUC_INTERNAL
 void pcmk__xml_doc_clear_flags(xmlDoc *doc, uint32_t flags);
 
 G_GNUC_INTERNAL
+bool pcmk__xml_reset_node_flags(xmlNode *xml, void *user_data);
+
+G_GNUC_INTERNAL
 void pcmk__xml_new_private_data(xmlNode *xml);
 
 G_GNUC_INTERNAL
