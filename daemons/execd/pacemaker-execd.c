@@ -272,20 +272,23 @@ handle_shutdown_ack(void)
 /*!
  * \internal
  * \brief Handle rejection of shutdown request
+ *
+ * \return Standard Pacemaker return code
  */
-void
+int
 handle_shutdown_nack(void)
 {
 #ifdef PCMK__COMPILE_REMOTE
     if (shutting_down) {
         pcmk__info("Exiting immediately after IPC proxy provider indicated no "
                    "resources will be stopped");
-        execd_cleanup();
-        crm_exit(CRM_EX_OK);
+        return ESHUTDOWN;
     }
 #endif
+
     pcmk__debug("Ignoring unexpected shutdown rejection from IPC proxy "
                 "provider");
+    return pcmk_rc_ok;
 }
 
 static GOptionEntry entries[] = {
