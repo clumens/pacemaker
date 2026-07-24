@@ -98,6 +98,7 @@ struct pcmk__daemon_s {
 // IPC functions
 
 bool pcmk__daemon_ipc_running(pcmk__daemon_t *srv);
+bool pcmk__generic_ipc_running(pcmk__daemon_t *srv);
 
 // Mainloop management functions
 
