@@ -1029,10 +1029,6 @@ unpack_bundle_container(pcmk_resource_t *rsc)
         pcmk__scan_min_int(value, &bundle_data->nreplicas, 1);
     }
 
-    /* Communication between containers on the same host via the floating IPs
-     * works only if the container is started with:
-     *   --userland-proxy=false --ip-masq=false
-     */
     value = pcmk__xe_get(xml, PCMK_XA_REPLICAS_PER_HOST);
     pcmk__scan_min_int(value, &bundle_data->nreplicas_per_host, 1);
 
