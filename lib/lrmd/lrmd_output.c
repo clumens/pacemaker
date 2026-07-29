@@ -15,12 +15,11 @@
 #include <crm/common/xml.h>
 
 static int
-default_list(pcmk__output_t *out, lrmd_list_t *list, const char *title) {
-    lrmd_list_t *iter = NULL;
-
+default_list(pcmk__output_t *out, const lrmd_list_t *list, const char *title)
+{
     out->begin_list(out, NULL, NULL, "%s", title);
 
-    for (iter = list; iter != NULL; iter = iter->next) {
+    for (const lrmd_list_t *iter = list; iter != NULL; iter = iter->next) {
         out->list_item(out, NULL, "%s", iter->val);
     }
 
@@ -29,20 +28,20 @@ default_list(pcmk__output_t *out, lrmd_list_t *list, const char *title) {
 }
 
 static int
-xml_list(pcmk__output_t *out, lrmd_list_t *list, const char *ele) {
-    lrmd_list_t *iter = NULL;
-
-    for (iter = list; iter != NULL; iter = iter->next) {
+xml_list(pcmk__output_t *out, const lrmd_list_t *list, const char *ele)
+{
+    for (const lrmd_list_t *iter = list; iter != NULL; iter = iter->next) {
         pcmk__output_create_xml_text_node(out, ele, iter->val);
     }
 
     return pcmk_rc_ok;
 }
 
-PCMK__OUTPUT_ARGS("alternatives-list", "lrmd_list_t *", "const char *")
+PCMK__OUTPUT_ARGS("alternatives-list", "const lrmd_list_t *", "const char *")
 static int
-lrmd__alternatives_list_xml(pcmk__output_t *out, va_list args) {
-    lrmd_list_t *list = va_arg(args, lrmd_list_t *);
+lrmd__alternatives_list_xml(pcmk__output_t *out, va_list args)
+{
+    const lrmd_list_t *list = va_arg(args, const lrmd_list_t *);
     const char *agent_spec = va_arg(args, const char *);
 
     int rc = pcmk_rc_ok;
@@ -55,19 +54,22 @@ lrmd__alternatives_list_xml(pcmk__output_t *out, va_list args) {
     return rc;
 }
 
-PCMK__OUTPUT_ARGS("alternatives-list", "lrmd_list_t *", "const char *")
+PCMK__OUTPUT_ARGS("alternatives-list", "const lrmd_list_t *", "const char *")
 static int
-lrmd__alternatives_list(pcmk__output_t *out, va_list args) {
-    lrmd_list_t *list = va_arg(args, lrmd_list_t *);
+lrmd__alternatives_list(pcmk__output_t *out, va_list args)
+{
+    const lrmd_list_t *list = va_arg(args, const lrmd_list_t *);
     const char *agent_spec G_GNUC_UNUSED = va_arg(args, const char *);
 
     return default_list(out, list, "Providers");
 }
 
-PCMK__OUTPUT_ARGS("agents-list", "lrmd_list_t *", "const char *", "const char *")
+PCMK__OUTPUT_ARGS("agents-list", "const lrmd_list_t *", "const char *",
+                  "const char *")
 static int
-lrmd__agents_list_xml(pcmk__output_t *out, va_list args) {
-    lrmd_list_t *list = va_arg(args, lrmd_list_t *);
+lrmd__agents_list_xml(pcmk__output_t *out, va_list args)
+{
+    const lrmd_list_t *list = va_arg(args, const lrmd_list_t *);
     const char *agent_spec = va_arg(args, const char *);
     const char *provider = va_arg(args, const char *);
 
@@ -87,10 +89,12 @@ lrmd__agents_list_xml(pcmk__output_t *out, va_list args) {
     return rc;
 }
 
-PCMK__OUTPUT_ARGS("agents-list", "lrmd_list_t *", "const char *", "const char *")
+PCMK__OUTPUT_ARGS("agents-list", "const lrmd_list_t *", "const char *",
+                  "const char *")
 static int
-lrmd__agents_list(pcmk__output_t *out, va_list args) {
-    lrmd_list_t *list = va_arg(args, lrmd_list_t *);
+lrmd__agents_list(pcmk__output_t *out, va_list args)
+{
+    const lrmd_list_t *list = va_arg(args, const lrmd_list_t *);
     const char *agent_spec = va_arg(args, const char *);
     const char *provider = va_arg(args, const char *);
 
@@ -103,10 +107,11 @@ lrmd__agents_list(pcmk__output_t *out, va_list args) {
     return rc;
 }
 
-PCMK__OUTPUT_ARGS("providers-list", "lrmd_list_t *", "const char *")
+PCMK__OUTPUT_ARGS("providers-list", "const lrmd_list_t *", "const char *")
 static int
-lrmd__providers_list_xml(pcmk__output_t *out, va_list args) {
-    lrmd_list_t *list = va_arg(args, lrmd_list_t *);
+lrmd__providers_list_xml(pcmk__output_t *out, va_list args)
+{
+    const lrmd_list_t *list = va_arg(args, const lrmd_list_t *);
     const char *agent_spec = va_arg(args, const char *);
 
     int rc = pcmk_rc_ok;
@@ -123,19 +128,21 @@ lrmd__providers_list_xml(pcmk__output_t *out, va_list args) {
     return rc;
 }
 
-PCMK__OUTPUT_ARGS("providers-list", "lrmd_list_t *", "const char *")
+PCMK__OUTPUT_ARGS("providers-list", "const lrmd_list_t *", "const char *")
 static int
-lrmd__providers_list(pcmk__output_t *out, va_list args) {
-    lrmd_list_t *list = va_arg(args, lrmd_list_t *);
+lrmd__providers_list(pcmk__output_t *out, va_list args)
+{
+    const lrmd_list_t *list = va_arg(args, const lrmd_list_t *);
     const char *agent_spec G_GNUC_UNUSED = va_arg(args, const char *);
 
     return default_list(out, list, "Providers");
 }
 
-PCMK__OUTPUT_ARGS("standards-list", "lrmd_list_t *")
+PCMK__OUTPUT_ARGS("standards-list", "const lrmd_list_t *")
 static int
-lrmd__standards_list(pcmk__output_t *out, va_list args) {
-    lrmd_list_t *list = va_arg(args, lrmd_list_t *);
+lrmd__standards_list(pcmk__output_t *out, va_list args)
+{
+    const lrmd_list_t *list = va_arg(args, const lrmd_list_t *);
 
     return default_list(out, list, "Standards");
 }
@@ -153,6 +160,7 @@ static pcmk__message_entry_t fmt_functions[] = {
 };
 
 void
-lrmd__register_messages(pcmk__output_t *out) {
+lrmd__register_messages(pcmk__output_t *out)
+{
     pcmk__register_messages(out, fmt_functions);
 }
