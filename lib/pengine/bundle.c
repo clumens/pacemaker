@@ -2247,6 +2247,9 @@ pe__bundle_max_per_node(const pcmk_resource_t *rsc)
     pe__bundle_variant_data_t *bundle_data = NULL;
 
     get_bundle_variant_data(bundle_data, rsc);
-    pcmk__assert(bundle_data->nreplicas_per_host >= 0);
-    return (unsigned int) bundle_data->nreplicas_per_host;
+
+    // Minimum value of 1 is enforced at unpack time
+    pcmk__assert(bundle_data->nreplicas_per_host > 0);
+
+    return bundle_data->nreplicas_per_host;
 }
