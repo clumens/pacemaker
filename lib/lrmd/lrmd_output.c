@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 the Pacemaker project contributors
+ * Copyright 2020-2026 the Pacemaker project contributors
  *
  * The version control history for this file may have further details.
  *
@@ -8,42 +8,40 @@
  */
 
 #include <crm_internal.h>
+
 #include <stdarg.h>
 
 #include <crm/lrmd_internal.h>
 #include <crm/common/xml.h>
 
 static int
-default_list(pcmk__output_t *out, lrmd_list_t *list, const char *title) {
-    lrmd_list_t *iter = NULL;
-
+default_list(pcmk__output_t *out, const lrmd_list_t *list, const char *title)
+{
     out->begin_list(out, NULL, NULL, "%s", title);
 
-    for (iter = list; iter != NULL; iter = iter->next) {
+    for (const lrmd_list_t *iter = list; iter != NULL; iter = iter->next) {
         out->list_item(out, NULL, "%s", iter->val);
     }
 
     out->end_list(out);
-    lrmd_list_freeall(list);
     return pcmk_rc_ok;
 }
 
 static int
-xml_list(pcmk__output_t *out, lrmd_list_t *list, const char *ele) {
-    lrmd_list_t *iter = NULL;
-
-    for (iter = list; iter != NULL; iter = iter->next) {
+xml_list(pcmk__output_t *out, const lrmd_list_t *list, const char *ele)
+{
+    for (const lrmd_list_t *iter = list; iter != NULL; iter = iter->next) {
         pcmk__output_create_xml_text_node(out, ele, iter->val);
     }
 
-    lrmd_list_freeall(list);
     return pcmk_rc_ok;
 }
 
-PCMK__OUTPUT_ARGS("alternatives-list", "lrmd_list_t *", "const char *")
+PCMK__OUTPUT_ARGS("alternatives-list", "const lrmd_list_t *", "const char *")
 static int
-lrmd__alternatives_list_xml(pcmk__output_t *out, va_list args) {
-    lrmd_list_t *list = va_arg(args, lrmd_list_t *);
+alternatives_list_xml(pcmk__output_t *out, va_list args)
+{
+    const lrmd_list_t *list = va_arg(args, const lrmd_list_t *);
     const char *agent_spec = va_arg(args, const char *);
 
     int rc = pcmk_rc_ok;
@@ -56,19 +54,22 @@ lrmd__alternatives_list_xml(pcmk__output_t *out, va_list args) {
     return rc;
 }
 
-PCMK__OUTPUT_ARGS("alternatives-list", "lrmd_list_t *", "const char *")
+PCMK__OUTPUT_ARGS("alternatives-list", "const lrmd_list_t *", "const char *")
 static int
-lrmd__alternatives_list(pcmk__output_t *out, va_list args) {
-    lrmd_list_t *list = va_arg(args, lrmd_list_t *);
+alternatives_list(pcmk__output_t *out, va_list args)
+{
+    const lrmd_list_t *list = va_arg(args, const lrmd_list_t *);
     const char *agent_spec G_GNUC_UNUSED = va_arg(args, const char *);
 
     return default_list(out, list, "Providers");
 }
 
-PCMK__OUTPUT_ARGS("agents-list", "lrmd_list_t *", "const char *", "const char *")
+PCMK__OUTPUT_ARGS("agents-list", "const lrmd_list_t *", "const char *",
+                  "const char *")
 static int
-lrmd__agents_list_xml(pcmk__output_t *out, va_list args) {
-    lrmd_list_t *list = va_arg(args, lrmd_list_t *);
+agents_list_xml(pcmk__output_t *out, va_list args)
+{
+    const lrmd_list_t *list = va_arg(args, const lrmd_list_t *);
     const char *agent_spec = va_arg(args, const char *);
     const char *provider = va_arg(args, const char *);
 
@@ -88,10 +89,12 @@ lrmd__agents_list_xml(pcmk__output_t *out, va_list args) {
     return rc;
 }
 
-PCMK__OUTPUT_ARGS("agents-list", "lrmd_list_t *", "const char *", "const char *")
+PCMK__OUTPUT_ARGS("agents-list", "const lrmd_list_t *", "const char *",
+                  "const char *")
 static int
-lrmd__agents_list(pcmk__output_t *out, va_list args) {
-    lrmd_list_t *list = va_arg(args, lrmd_list_t *);
+agents_list(pcmk__output_t *out, va_list args)
+{
+    const lrmd_list_t *list = va_arg(args, const lrmd_list_t *);
     const char *agent_spec = va_arg(args, const char *);
     const char *provider = va_arg(args, const char *);
 
@@ -104,10 +107,11 @@ lrmd__agents_list(pcmk__output_t *out, va_list args) {
     return rc;
 }
 
-PCMK__OUTPUT_ARGS("providers-list", "lrmd_list_t *", "const char *")
+PCMK__OUTPUT_ARGS("providers-list", "const lrmd_list_t *", "const char *")
 static int
-lrmd__providers_list_xml(pcmk__output_t *out, va_list args) {
-    lrmd_list_t *list = va_arg(args, lrmd_list_t *);
+providers_list_xml(pcmk__output_t *out, va_list args)
+{
+    const lrmd_list_t *list = va_arg(args, const lrmd_list_t *);
     const char *agent_spec = va_arg(args, const char *);
 
     int rc = pcmk_rc_ok;
@@ -124,36 +128,39 @@ lrmd__providers_list_xml(pcmk__output_t *out, va_list args) {
     return rc;
 }
 
-PCMK__OUTPUT_ARGS("providers-list", "lrmd_list_t *", "const char *")
+PCMK__OUTPUT_ARGS("providers-list", "const lrmd_list_t *", "const char *")
 static int
-lrmd__providers_list(pcmk__output_t *out, va_list args) {
-    lrmd_list_t *list = va_arg(args, lrmd_list_t *);
+providers_list(pcmk__output_t *out, va_list args)
+{
+    const lrmd_list_t *list = va_arg(args, const lrmd_list_t *);
     const char *agent_spec G_GNUC_UNUSED = va_arg(args, const char *);
 
     return default_list(out, list, "Providers");
 }
 
-PCMK__OUTPUT_ARGS("standards-list", "lrmd_list_t *")
+PCMK__OUTPUT_ARGS("standards-list", "const lrmd_list_t *")
 static int
-lrmd__standards_list(pcmk__output_t *out, va_list args) {
-    lrmd_list_t *list = va_arg(args, lrmd_list_t *);
+standards_list(pcmk__output_t *out, va_list args)
+{
+    const lrmd_list_t *list = va_arg(args, const lrmd_list_t *);
 
     return default_list(out, list, "Standards");
 }
 
 static pcmk__message_entry_t fmt_functions[] = {
-    { "alternatives-list", "default", lrmd__alternatives_list },
-    { "alternatives-list", "xml", lrmd__alternatives_list_xml },
-    { "agents-list", "default", lrmd__agents_list },
-    { "agents-list", "xml", lrmd__agents_list_xml },
-    { "providers-list", "default", lrmd__providers_list },
-    { "providers-list", "xml", lrmd__providers_list_xml },
-    { "standards-list", "default", lrmd__standards_list },
+    { "alternatives-list", "default", alternatives_list },
+    { "alternatives-list", "xml", alternatives_list_xml },
+    { "agents-list", "default", agents_list },
+    { "agents-list", "xml", agents_list_xml },
+    { "providers-list", "default", providers_list },
+    { "providers-list", "xml", providers_list_xml },
+    { "standards-list", "default", standards_list },
 
     { NULL, NULL, NULL }
 };
 
 void
-lrmd__register_messages(pcmk__output_t *out) {
+lrmd__register_messages(pcmk__output_t *out)
+{
     pcmk__register_messages(out, fmt_functions);
 }

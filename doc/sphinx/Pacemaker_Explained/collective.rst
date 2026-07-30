@@ -765,7 +765,10 @@ ___________________________
           single: replicas-per-host; podman attribute
 
        A positive integer specifying the number of container instances allowed
-       to run on a single node
+       to run on a single node. Communication between containers on the same
+       host via floating IPs may require changing the container service's
+       networking settings. For example, ``--userland-proxy=false`` and
+       ``--ip-masq=true`` may be required for ``dockerd``.
    * - promoted-max
      - 0
      - .. index::
