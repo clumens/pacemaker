@@ -73,7 +73,7 @@ fail_pending_op(void *key, void *value, void *user_data)
 
     event->call_id = op->call_id;
     event->remote_nodename = pcmk__str_copy(lrm_state->node_name);
-    event->params = op->params;
+    event->params = pcmk__str_table_dup(op->params);
 
     process_lrm_event(lrm_state, event, op, NULL);
     lrmd_free_event(event);
