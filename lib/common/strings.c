@@ -598,10 +598,6 @@ pcmk__compress(const char *data, size_t length, char **result, size_t *result_le
     int rc = pcmk_rc_ok;
     char *compressed = NULL;
     char *uncompressed = NULL;
-#ifdef CLOCK_MONOTONIC
-    struct timespec after_t;
-    struct timespec before_t;
-#endif
 
     /* Did the max calculation overflow? */
     if (max < length) {
@@ -618,10 +614,6 @@ pcmk__compress(const char *data, size_t length, char **result, size_t *result_le
     }
 #endif
 
-#ifdef CLOCK_MONOTONIC
-    clock_gettime(CLOCK_MONOTONIC, &before_t);
-#endif
-
     compressed = pcmk__assert_alloc(max, sizeof(char));
     uncompressed = pcmk__str_copy(data);
 
@@ -635,21 +627,13 @@ pcmk__compress(const char *data, size_t length, char **result, size_t *result_le
     free(uncompressed);
 
     if (rc != pcmk_rc_ok) {
-        pcmk__err("Compression of %d bytes failed: %s " QB_XS " rc=%d", length,
+        pcmk__err("Compression of %zu bytes failed: %s " QB_XS " rc=%d", length,
                   pcmk_rc_str(rc), rc);
         free(compressed);
         return rc;
     }
 
-#ifdef CLOCK_MONOTONIC
-    clock_gettime(CLOCK_MONOTONIC, &after_t);
-
-    pcmk__trace("Compressed %zu bytes into %zu in %.0fms", length, *result_len,
-                (((after_t.tv_sec - before_t.tv_sec) * 1000)
-                 + ((after_t.tv_nsec - before_t.tv_nsec) / 1e6)));
-#else
     pcmk__trace("Compressed %zu bytes into %zu", length, *result_len);
-#endif
 
     *result = compressed;
     return pcmk_rc_ok;
