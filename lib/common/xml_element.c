@@ -1109,31 +1109,6 @@ pcmk__xe_update_match(xmlNode *xml, xmlNode *update, uint32_t flags)
     return ENXIO;
 }
 
-void
-pcmk__xe_set_propv(xmlNodePtr node, va_list pairs)
-{
-    while (true) {
-        const char *name, *value;
-
-        name = va_arg(pairs, const char *);
-        if (name == NULL) {
-            return;
-        }
-
-        value = va_arg(pairs, const char *);
-        pcmk__xe_set(node, name, value);
-    }
-}
-
-void
-pcmk__xe_set_props(xmlNodePtr node, ...)
-{
-    va_list pairs;
-    va_start(pairs, node);
-    pcmk__xe_set_propv(node, pairs);
-    va_end(pairs);
-}
-
 int
 pcmk__xe_foreach_child(xmlNode *xml, const char *child_element_name,
                        int (*handler)(xmlNode *xml, void *userdata),

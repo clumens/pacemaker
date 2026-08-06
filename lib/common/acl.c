@@ -590,14 +590,14 @@ unpack_acl_target_or_group(xmlNode *xml, void *user_data)
  * \param[in,out] target  XML document private data whose \c acls field to set
  * \param[in]     user    User whose ACLs to unpack
  */
-void
-pcmk__unpack_acls(xmlDoc *source, xml_doc_private_t *target, const char *user)
+static void
+unpack_acls(xmlDoc *source, xml_doc_private_t *target, const char *user)
 {
     xmlNode *acls = NULL;
 
     pcmk__assert(target != NULL);
 
-    if ((target->acls != NULL) || !pcmk_acl_required(user)) {
+    if ((target->acls != NULL) || !pcmk__acl_required(user)) {
         return;
     }
 
@@ -733,7 +733,7 @@ pcmk__enable_acls(xmlDoc *source, xmlDoc *target, const char *user)
     if (target == NULL) {
         return;
     }
-    pcmk__unpack_acls(source, target->_private, user);
+    unpack_acls(source, target->_private, user);
     pcmk__xml_doc_set_flags(target, pcmk__xf_acl_enabled);
     pcmk__apply_acls(target);
 }
@@ -958,7 +958,7 @@ pcmk__acl_filtered_copy(const char *user, xmlDoc *acl_source, xmlNode *xml)
 
     result = pcmk__xml_copy(NULL, xml);
 
-    if (!pcmk_acl_required(user)) {
+    if (!pcmk__acl_required(user)) {
         // Return an unfiltered copy
         return result;
     }
@@ -1077,50 +1077,35 @@ pcmk__check_creation_acls(xmlNode *xml)
     pcmk__xml_tree_foreach_remove(xml, check_creation_disallowed);
 }
 
-/*!
- * \brief Check whether or not an XML node is ACL-denied
- *
- * \param[in]  xml node to check
- *
- * \return true if XML node exists and is ACL-denied, false otherwise
- */
-bool
-xml_acl_denied(const xmlNode *xml)
-{
-    if (xml && xml->doc && xml->doc->_private){
-        xml_doc_private_t *docpriv = xml->doc->_private;
-
-        return pcmk__is_set(docpriv->flags, pcmk__xf_acl_denied);
-    }
-    return false;
-}
-
 void
 xml_acl_disable(xmlNode *xml)
 {
-    if ((xml != NULL)
-        && pcmk__xml_doc_all_flags_set(xml->doc, pcmk__xf_acl_enabled)) {
+    xmlNode *child = NULL;
 
-        xml_doc_private_t *docpriv = xml->doc->_private;
+    if ((xml == NULL)
+        || !pcmk__xml_doc_all_flags_set(xml->doc, pcmk__xf_acl_enabled)) {
 
-        /* Catch anything that was created but shouldn't have been */
-        pcmk__apply_acls(xml->doc);
-
-        /* Be sure not to free xml itself.
-         *
-         * @TODO Maybe we should free xml if it's newly created and the creation
-         * is disallowed, but we would need a way to inform the caller. This is
-         * public API.
-         */
-        xml = pcmk__xml_first_child(xml);
-        while (xml != NULL) {
-            xmlNode *next = pcmk__xml_next(xml);
-
-            pcmk__check_creation_acls(xml);
-            xml = next;
-        }
-        pcmk__clear_xml_flags(docpriv, pcmk__xf_acl_enabled);
+        return;
     }
+
+    // Catch anything that was created but shouldn't have been
+    pcmk__apply_acls(xml->doc);
+
+    /* Be sure not to free xml itself.
+     *
+     * @TODO Maybe we should free xml if it's newly created and the creation
+     * is disallowed, but we would need a way to inform the caller. This is
+     * public API.
+     */
+    child = pcmk__xml_first_child(xml);
+    while (child != NULL) {
+        xmlNode *next = pcmk__xml_next(child);
+
+        pcmk__check_creation_acls(child);
+        child = next;
+    }
+
+    pcmk__xml_doc_clear_flags(xml->doc, pcmk__xf_acl_enabled);
 }
 
 /*!
@@ -1210,28 +1195,6 @@ pcmk__check_acl(xmlNode *xml, const char *attr_name, enum pcmk__xml_flags mode)
 
     check_acl_deny(xml, attr_name, "Default ", docpriv->acl_user, mode);
     return false;
-}
-
-/*!
- * \brief Check whether ACLs are required for a given user
- *
- * \param[in]  User name to check
- *
- * \return true if the user requires ACLs, false otherwise
- */
-bool
-pcmk_acl_required(const char *user)
-{
-    if (pcmk__str_empty(user)) {
-        pcmk__trace("ACLs not required because no user set");
-        return false;
-
-    } else if (pcmk__is_privileged(user)) {
-        pcmk__trace("ACLs not required for privileged user %s", user);
-        return false;
-    }
-    pcmk__trace("ACLs required for %s", user);
-    return true;
 }
 
 char *
@@ -1365,13 +1328,26 @@ xml_acl_filtered_copy(const char *user, xmlNode *acl_source, xmlNode *xml,
                       xmlNode **result)
 {
     if ((acl_source == NULL) || (acl_source->doc == NULL) || (xml == NULL)
-        || !pcmk_acl_required(user)) {
+        || !pcmk__acl_required(user)) {
 
         return false;
     }
 
     *result = pcmk__acl_filtered_copy(user, acl_source->doc, xml);
     return true;
+}
+
+bool
+xml_acl_denied(const xmlNode *xml)
+{
+    return (xml != NULL)
+           && pcmk__xml_doc_all_flags_set(xml->doc, pcmk__xf_acl_denied);
+}
+
+bool
+pcmk_acl_required(const char *user)
+{
+    return pcmk__acl_required(user);
 }
 
 // LCOV_EXCL_STOP

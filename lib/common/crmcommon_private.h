@@ -120,13 +120,25 @@ G_GNUC_INTERNAL
 void pcmk__xml_set_parent_flags(xmlNode *xml, uint64_t flags);
 
 G_GNUC_INTERNAL
+void pcmk__xml_doc_clear_flags(xmlDoc *doc, uint32_t flags);
+
+G_GNUC_INTERNAL
+bool pcmk__xml_reset_node_flags(xmlNode *xml, void *user_data);
+
+G_GNUC_INTERNAL
 void pcmk__xml_new_private_data(xmlNode *xml);
+
+G_GNUC_INTERNAL
+void pcmk__xml_reset_doc_private_data(xml_doc_private_t *docpriv);
 
 G_GNUC_INTERNAL
 void pcmk__xml_free_private_data(xmlNode *xml);
 
 G_GNUC_INTERNAL
 void pcmk__xml_free_node(xmlNode *xml);
+
+G_GNUC_INTERNAL
+int pcmk__xml_free_position(xmlNode *node, int position);
 
 G_GNUC_INTERNAL
 xmlDoc *pcmk__xml_new_doc(void);
@@ -142,10 +154,6 @@ void pcmk__xc_update(xmlNode *parent, xmlNode *target, xmlNode *update);
 
 G_GNUC_INTERNAL
 void pcmk__free_acls(GList *acls);
-
-G_GNUC_INTERNAL
-void pcmk__unpack_acls(xmlDoc *source, xml_doc_private_t *target,
-                       const char *user);
 
 G_GNUC_INTERNAL
 bool pcmk__is_user_in_group(const char *user, const char *group);

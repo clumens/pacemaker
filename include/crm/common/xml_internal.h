@@ -34,6 +34,7 @@
 #include <crm/common/xml_idref_internal.h>
 #include <crm/common/xml_io_internal.h>
 #include <crm/common/xml_names_internal.h>
+#include <crm/common/xml_tracking_internal.h>
 #include <crm/common/xpath_internal.h>
 
 #include <libxml/relaxng.h>
@@ -260,7 +261,6 @@ enum pcmk__xml_escape_type {
     pcmk__xml_escape_attr_pretty,
 };
 
-bool pcmk__xml_needs_escape(const char *text, enum pcmk__xml_escape_type type);
 char *pcmk__xml_escape(const char *text, enum pcmk__xml_escape_type type);
 
 /*!
@@ -427,9 +427,8 @@ enum pcmk__xml_flags {
 void pcmk__xml_doc_set_flags(xmlDoc *doc, uint32_t flags);
 bool pcmk__xml_doc_all_flags_set(const xmlDoc *xml, uint32_t flags);
 
-void pcmk__xml_commit_changes(xmlDoc *doc);
-void pcmk__xml_mark_changes(xmlNode *old_xml, xmlNode *new_xml);
-
+bool pcmk__xml_foreach_child(xmlNode *xml, bool (*fn)(xmlNode *, void *),
+                             void *user_data);
 bool pcmk__xml_tree_foreach(xmlNode *xml, bool (*fn)(xmlNode *, void *),
                             void *user_data);
 
