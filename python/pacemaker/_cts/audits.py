@@ -227,7 +227,7 @@ class DiskAudit(ClusterAudit):
                 used_percent = int(used)
                 remaining_mb = int(remain)
             except (ValueError, TypeError):
-                logging.log(f"Warning: df output '{dfout}' from {node} was invalid [{used}, {remain}]")
+                logging.log(f"Warning: df output '{dfout}' from {node} was invalid")
             else:
                 if remaining_mb < 10 or used_percent > 95:
                     logging.log(f"CRIT: Out of log disk space on {node} ({used_percent}% / {remaining_mb}MB)")
