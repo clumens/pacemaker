@@ -41,6 +41,20 @@ pcmk__daemon_init(pcmk__daemon_t *srv)
 
 /*!
  * \internal
+ * \brief Clean up IPC communication
+ *
+ * \param[in,out] srv The daemon object
+ */
+void
+pcmk__daemon_ipc_cleanup(pcmk__daemon_t *srv)
+{
+    pcmk__drop_all_clients(srv->ipcs);
+    g_clear_pointer(&srv->ipcs, qb_ipcs_destroy);
+    pcmk__client_cleanup();
+}
+
+/*!
+ * \internal
  * \brief Initialize the IPC side of the server
  *
  * This is a generic function that should be good enough for most purposes.
