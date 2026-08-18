@@ -11,16 +11,61 @@
 
 #include <signal.h>                 // SIG*
 #include <stdbool.h>                // bool, false, true
-#include <stddef.h>                 // NULL
+#include <stddef.h>                 // NULL, size_t
+#include <sys/types.h>              // gid_t, uid_t
 #include <time.h>                   // time
 
 #include <glib.h>                   // g_clear_pointer, g_main_loop_*
-#include <qb/qbipcs.h>              // qb_ipcs_service_handlers
+#include <qb/qbipcs.h>              // qb_ipcs_*
 
 #include <crm/common/ipc.h>         // crm_ipc_*, pcmk_ipc_api_t, pcmk_*_ipc_api
 #include <crm/common/logging.h>     // CRM_CHECK
 #include <crm/common/mainloop.h>    // mainloop_add_ipc_server
 #include <crm/common/results.h>     // CRM_EX_*, crm_exit, pcmk_rc_*
+
+static int32_t
+ipc_accept(qb_ipcs_connection_t *c, uid_t uid, gid_t gid)
+{
+    pcmk__daemon_t *srv = qb_ipcs_connection_service_context_get(c);
+    return pcmk__daemon_ipc_accept(srv, c, uid, gid);
+}
+
+static int32_t
+ipc_closed(qb_ipcs_connection_t *c)
+{
+    pcmk__daemon_t *srv = qb_ipcs_connection_service_context_get(c);
+    return pcmk__daemon_ipc_closed(srv, c);
+}
+
+static void
+ipc_created(qb_ipcs_connection_t *c)
+{
+    pcmk__daemon_t *srv = qb_ipcs_connection_service_context_get(c);
+    pcmk__daemon_ipc_created(srv, c);
+}
+
+static void
+ipc_destroy(qb_ipcs_connection_t *c)
+{
+    pcmk__daemon_t *srv = qb_ipcs_connection_service_context_get(c);
+    pcmk__daemon_ipc_destroy(srv, c);
+}
+
+static int32_t
+ipc_dispatch(qb_ipcs_connection_t *c, void *data, size_t size)
+{
+    pcmk__daemon_t *srv = qb_ipcs_connection_service_context_get(c);
+    pcmk__daemon_ipc_dispatch(srv, c, data, size);
+    return 0;
+}
+
+static struct qb_ipcs_service_handlers ipc_callbacks = {
+    .connection_accept = ipc_accept,
+    .connection_created = ipc_created,
+    .msg_process = ipc_dispatch,
+    .connection_closed = ipc_closed,
+    .connection_destroyed = ipc_destroy
+};
 
 /*!
  * \internal
@@ -127,7 +172,10 @@ pcmk__daemon_ipc_created(pcmk__daemon_t *srv, qb_ipcs_connection_t *c)
 
     pcmk__assert(client != NULL);
     pcmk__trace("New client connection %p", c);
-    srv->ipc_fns->created(srv, client);
+
+    if (srv->ipc_fns->created != NULL) {
+        srv->ipc_fns->created(srv, client);
+    }
 }
 
 /*!
@@ -231,15 +279,15 @@ done:
  * Certain servers may require specialized functionality.
  *
  * \param[in,out] srv The daemon object
- * \param[in,out] cb  The IPC callback object
  */
 bool
-pcmk__daemon_ipc_init(pcmk__daemon_t *srv, struct qb_ipcs_service_handlers *cb)
+pcmk__daemon_ipc_init(pcmk__daemon_t *srv)
 {
-    pcmk__assert((srv->ipcs == NULL) && (cb != NULL));
+    pcmk__assert(srv->ipcs == NULL);
 
     srv->ipcs = mainloop_add_ipc_server_with_prio(pcmk__server_ipc_name(srv->type),
-                                                  QB_IPC_SHM, cb, srv->priority);
+                                                  QB_IPC_SHM, &ipc_callbacks,
+                                                  srv->priority);
 
     if (srv->ipcs == NULL) {
         pcmk__crit("Failed to create %s IPC server; shutting down",
@@ -248,6 +296,8 @@ pcmk__daemon_ipc_init(pcmk__daemon_t *srv, struct qb_ipcs_service_handlers *cb)
                    "enabled");
         return false;
     }
+
+    qb_ipcs_service_context_set(srv->ipcs, srv);
 
     return true;
 }
