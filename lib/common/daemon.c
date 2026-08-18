@@ -191,15 +191,17 @@ pcmk__daemon_ipc_dispatch(pcmk__daemon_t *srv, qb_ipcs_connection_t *c,
     g_byte_array_free(request.ipc_client->buffer, TRUE);
     request.ipc_client->buffer = NULL;
 
-    if (request.xml == NULL) {
+    if ((request.xml == NULL)
+        || ((srv->ipc_fns->invalid_msg != NULL) && srv->ipc_fns->invalid_msg(request.xml))) {
         pcmk__debug("Unrecognizable IPC data from PID %d", pcmk__client_pid(c));
         pcmk__ipc_send_ack(request.ipc_client, request.ipc_id, request.ipc_flags,
                            NULL, CRM_EX_PROTOCOL);
-        return;
+        goto done;
     }
 
     srv->ipc_fns->dispatch(srv, &request);
 
+done:
     pcmk__xml_free(request.xml);
     return;
 }
