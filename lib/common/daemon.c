@@ -78,10 +78,17 @@ static struct qb_ipcs_service_handlers ipc_callbacks = {
 int
 pcmk__daemon_init(pcmk__daemon_t *srv)
 {
+    int rc = pcmk_rc_ok;
+
+    rc = srv->ipc_fns->init(srv);
+    if (rc != pcmk_rc_ok) {
+        return rc;
+    }
+
     srv->start_time = time(NULL);
 
     srv->mainloop = g_main_loop_new(NULL, false);
-    return pcmk_rc_ok;
+    return rc;
 }
 
 /*!
@@ -279,8 +286,10 @@ done:
  * Certain servers may require specialized functionality.
  *
  * \param[in,out] srv The daemon object
+ *
+ * \return Standard Pacemaker return code
  */
-bool
+int
 pcmk__daemon_ipc_init(pcmk__daemon_t *srv)
 {
     pcmk__assert(srv->ipcs == NULL);
@@ -294,12 +303,12 @@ pcmk__daemon_ipc_init(pcmk__daemon_t *srv)
                    pcmk__server_log_name(srv->type));
         pcmk__crit("Verify pacemaker and pacemaker_remote are not both "
                    "enabled");
-        return false;
+        return EIO;
     }
 
     qb_ipcs_service_context_set(srv->ipcs, srv);
 
-    return true;
+    return pcmk_rc_ok;
 }
 
 /*!
