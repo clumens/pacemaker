@@ -212,7 +212,6 @@ execd_cleanup(void)
     ipc_proxy_cleanup();
 #endif
 
-    execd_unregister_handlers();
     g_clear_pointer(&rsc_list, g_hash_table_destroy);
 }
 
@@ -491,7 +490,7 @@ main(int argc, char **argv)
     }
 #endif
 
-    rc = pcmk__daemon_init(&execd, NULL);
+    rc = pcmk__daemon_init(&execd, execd_handlers);
     if (rc != pcmk_rc_ok) {
         execd.ec = (rc == EIO) ? CRM_EX_FATAL : CRM_EX_ERROR;
         g_set_error(&error, PCMK__EXITC_ERROR, execd.ec,
